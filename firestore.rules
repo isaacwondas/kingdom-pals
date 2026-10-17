@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function roomExists(roomId) {
+      return exists(/databases/$(database)/documents/rooms/$(roomId));
+    }
+
+    function roomData(roomId) {
+      return get(/databases/$(database)/documents/rooms/$(roomId)).data;
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn() && request.auth.uid == userId;
+      allow create, update: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly([
+          'displayName', 'avatar', 'isAnonymous', 'createdAt', 'updatedAt'
+        ]);
+      allow delete: if signedIn() && request.auth.uid == userId;
+    }
+
+    // Private user contact details should not be readable by other players.
+    match /privateUsers/{userId} {
+      allow read, write: if signedIn() && request.auth.uid == userId;
+    }
+
+    match /rooms/{roomId} {
+      allow read: if signedIn()
+        && resource.data.players[request.auth.uid] != null;
+
+      // Creation must include the creator as host/player.
+      allow create: if signedIn()
+        && request.resource.data.hostId == request.auth.uid
+        && request.resource.data.players[request.auth.uid] != null
+        && request.resource.data.players[request.auth.uid].uid == request.auth.uid
+        && request.resource.data.players[request.auth.uid].isHost == true;
+
+      // These starter rules are deliberately conservative. They allow members to
+      // update their own player record and the host to update room controls.
+      // For a public production release, use callable Cloud Functions for all
+      // state transitions and score submissions, then narrow client writes further.
+      allow update: if signedIn()
+        && (
+          (
+            request.resource.data.hostId == resource.data.hostId
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'players'
+            ])
+            && request.resource.data.players[request.auth.uid] != null
+            && request.resource.data.players[request.auth.uid].uid == request.auth.uid
+          )
+          ||
+          (
+            resource.data.hostId == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'gameMode', 'currentQuestionIdx', 'status', 'players'
+            ])
+          )
+        );
+
+      allow delete: if signedIn() && resource.data.hostId == request.auth.uid;
+    }
+
+    // No client writes to a public global leaderboard. Use a trusted backend
+    // function to validate scores and publish ranking documents.
+    match /roomTruthSecrets/{secretId} {
+      allow read: if signedIn() && (
+        resource.data.playerUid == request.auth.uid
+        || (roomExists(resource.data.roomId)
+          && roomData(resource.data.roomId).hostId == request.auth.uid)
+      );
+      allow create, update: if signedIn()
+        && request.resource.data.playerUid == request.auth.uid
+        && roomExists(request.resource.data.roomId)
+        && roomData(request.resource.data.roomId).players[request.auth.uid] != null;
+      allow delete: if signedIn() && resource.data.playerUid == request.auth.uid;
+    }
+
+    match /leaderboard/{entryId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
