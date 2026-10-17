@@ -230,3 +230,110 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   text-transform: uppercase;
 }
+/* Animated Wheel Container */
+.kc-wheel-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  position: relative;
+}
+
+/* The Wheel Indicator Arrow */
+.kc-wheel-pointer {
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 20px solid #285541;
+  position: absolute;
+  top: -10px;
+  z-index: 10;
+}
+
+/* The Circular Wheel */
+.kc-wheel-circle {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 6px solid #285541;
+  background: conic-gradient(
+    #edf5ed 0deg 60deg,
+    #fdf8ed 60deg 120deg,
+    #fdeedf 120deg 180deg,
+    #edf5ed 180deg 240deg,
+    #fdf8ed 240deg 300deg,
+    #fdeedf 300deg 360deg
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  transition: transform 3s cubic-bezier(0.15, 0.85, 0.35, 1.2);
+}
+
+.kc-wheel-circle.spinning {
+  transform: rotate(1440deg); /* 4 full rotations */
+}
+
+/* Center Spin Hub Button */
+.kc-wheel-hub {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: #285541;
+  color: #fff;
+  border: 3px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  text-transform: uppercase;
+}
+/* Card container responsiveness */
+.kc-card, 
+.kc-join-card {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 20px 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Fix Avatar selection grid to wrap on narrow mobile screens */
+.kc-avatar-grid {
+  display: flex;
+  flex-wrap: wrap; /* Allows avatars to flow to next line instead of overflowing */
+  gap: 8px;
+  justify-content: flex-start;
+  margin-bottom: 16px;
+}
+
+.kc-avatar-btn {
+  flex: 0 0 calc(14.28% - 8px); /* 7 items per row if space permits */
+  min-width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+/* Fix Action Buttons (Create / Join inputs) for mobile */
+.kc-action-group {
+  display: flex;
+  flex-direction: column; /* Stack vertically on small screens */
+  gap: 12px;
+  width: 100%;
+}
+
+@media (min-width: 480px) {
+  .kc-action-group {
+    flex-direction: row;
+  }
+}

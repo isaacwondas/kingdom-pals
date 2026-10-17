@@ -152,7 +152,7 @@ export default function KingdomConnectionsApp() {
     }, (error) => notify(error.message, "error"));
   }, [user, activeRoomId]);
 
-useEffect(() => {
+  useEffect(() => {
     const game = roomData?.spinnerGame as any;
     if (roomData?.gameMode !== "spinner" || game?.phase !== "answering" || !game?.startedAt) {
       return;
@@ -170,7 +170,8 @@ useEffect(() => {
     const interval = setInterval(updateTimer, 1000);
 
     return () => clearInterval(interval);
-  }, [roomData?.gameMode, roomData?.spinnerGame?.phase, roomData?.spinnerGame?.startedAt]);
+  }, [roomData?.gameMode, roomData?.spinnerGame?.phase, roomData?.spinnerGame?.deadline]);
+
   const currentQuestion = BIBLE_QUESTIONS[soloIndex];
   const soloScore = useMemo(() => BIBLE_QUESTIONS.reduce((score, q) => (
     score + (soloAnswers[q.id] === q.correctIndex ? 100 : 0)
@@ -192,21 +193,15 @@ useEffect(() => {
   const currentHotTake = HOT_TAKES[(roomData?.currentQuestionIdx || 0) % HOT_TAKES.length];
   const currentHypothetical = HYPOTHETICALS[(roomData?.currentQuestionIdx || 0) % HYPOTHETICALS.length];
 
- const startGuest = async (): Promise<User | null> => {
-  try {
-    const res = await signInAnonymously(auth);
-    const guestUser = res.user;
-    
-    // Set local state if you have setUser(guestUser)
-    setUser(guestUser);
-    
-    // Return the user object so handleCreateRoom / handleJoinRoom can use it immediately!
-    return guestUser; 
-  } catch (err: any) {
-    notify(err.message || "Failed to sign in as guest", "error");
-    return null;
-  }
-};
+  const startGuest = async () => {
+    setBusy(true);
+    try {
+      if (!auth.currentUser) await signInAnonymously(auth);
+      setAuthMode("guest");
+      notify("You're ready to play!");
+    } catch (e) { notify(errorMessage(e), "error"); }
+    finally { setBusy(false); }
+  };
 
   const submitAuth = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -292,105 +287,32 @@ useEffect(() => {
   };
 
   const handleCreateRoom = async () => {
-  if (busy) return;
-  setBusy(true);
+    if (!user) return notify("Start as a guest or sign in first.", "error");
+    if (!name.trim() && !user.displayName) return notify("Enter a display name first.", "error");
+    setBusy(true);
+    try {
+      const id = await createRoom(user.uid, name.trim() || user.displayName || "Player", avatar);
+      setActiveRoomId(id);
+      setView("room");
+      notify(`Room ${id} created.`);
+    } catch (e) { notify(errorMessage(e), "error"); }
+    finally { setBusy(false); }
+  };
 
-  try {
-    let currentUser = user;
-
-    // 1. If not signed in yet, automatically create a guest session using the entered name!
-    if (!currentUser) {
-      currentUser = await startGuest(); 
-    }
-
-    if (!currentUser) {
-      notify("Failed to start session. Please try again.", "error");
-      setBusy(false);
-      return;
-    }
-
-    // 2. Save/update public profile with chosen avatar and name
-    const finalName = name.trim() || "Kingdom Player";
-    await savePublicProfile(currentUser, finalName, avatar);
-
-    // 3. Generate room code and create room in Firestore
-    const newRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    
-    await setDoc(doc(db, "rooms", newRoomCode), {
-      createdAt: serverTimestamp(),
-      hostUid: currentUser.uid,
-      gameMode: "lobby",
-      currentQuestionIdx: 0,
-      players: {
-        [currentUser.uid]: {
-          uid: currentUser.uid,
-          name: finalName,
-          avatar: avatar,
-          isHost: true,
-          joinedAt: Date.now()
-        }
-      }
-    });
-
-    setActiveRoomId(newRoomCode);
-    notify(`Room ${newRoomCode} created!`);
-  } catch (err: any) {
-    notify(err.message || "Could not create room", "error");
-  } finally {
-    setBusy(false);
-  }
-};
-
- const handleJoinRoom = async () => {
-  if (busy || !roomCode.trim()) return;
-  setBusy(true);
-
-  try {
-    let currentUser = user;
-
-    // Auto-initialize guest if user isn't logged in yet
-    if (!currentUser) {
-      currentUser = await startGuest();
-    }
-
-    if (!currentUser) {
-      notify("Failed to start session.", "error");
-      setBusy(false);
-      return;
-    }
-
-    const cleanCode = roomCode.trim().toUpperCase();
-    const roomRef = doc(db, "rooms", cleanCode);
-    const roomSnap = await getDoc(roomRef);
-
-    if (!roomSnap.exists()) {
-      notify("Room not found. Check the code and try again.", "error");
-      setBusy(false);
-      return;
-    }
-
-    const finalName = name.trim() || "Kingdom Player";
-    await savePublicProfile(currentUser, finalName, avatar);
-
-    // Add player to room document
-    await updateDoc(roomRef, {
-      [`players.${currentUser.uid}`]: {
-        uid: currentUser.uid,
-        name: finalName,
-        avatar: avatar,
-        isHost: false,
-        joinedAt: Date.now()
-      }
-    });
-
-    setActiveRoomId(cleanCode);
-    notify(`Joined room ${cleanCode}!`);
-  } catch (err: any) {
-    notify(err.message || "Could not join room", "error");
-  } finally {
-    setBusy(false);
-  }
-};
+  const handleJoinRoom = async () => {
+    if (!user) return notify("Start as a guest or sign in first.", "error");
+    if (!roomCode.trim()) return notify("Enter a room code.", "error");
+    if (!name.trim() && !user.displayName) return notify("Enter a display name first.", "error");
+    setBusy(true);
+    try {
+      const id = roomCode.trim().toUpperCase();
+      await joinRoom(id, user.uid, name.trim() || user.displayName || "Player", avatar);
+      setActiveRoomId(id);
+      setView("room");
+      notify(`Joined room ${id}.`);
+    } catch (e) { notify(errorMessage(e), "error"); }
+    finally { setBusy(false); }
+  };
 
   const answerSolo = (optionIndex: number) => {
     if (!currentQuestion || soloAnswers[currentQuestion.id] !== undefined) return;
@@ -490,7 +412,7 @@ useEffect(() => {
           </section>
         )}
 
-       {view === "room" && (
+        {view === "room" && (
           <section className="kc-game-panel kc-enter">
             <div className="kc-page-top">
               <button className="kc-back-link" onClick={() => setView("home")} type="button">← Back to home</button>
@@ -597,42 +519,8 @@ useEffect(() => {
             ) : (
               <div className="kc-room-view">
                 {/* Active room content continues here... */}
-                <div className="kc-room-header">
-                  <div>
-                    <div className="kc-eyebrow">ROOM CODE</div>
-                    <h1><span>{activeRoomId}</span></h1>
-                    <p>{roomPlayers.length} player{roomPlayers.length === 1 ? "" : "s"} inside</p>
-                  </div>
-                  <button className="kc-button kc-button-outline" onClick={() => shareText(`Join my Kingdom Connections room! Code: ${activeRoomId}`)} type="button"><Share2 size={15}/> Share Room</button>
-                </div>
 
-                <div className="kc-player-strip">
-                  {roomPlayers.map((p) => (
-                    <div className="kc-player-chip" key={p.uid}>
-                      <span>{p.avatar}</span><b>{p.name}</b>
-                      {p.isHost && <span className="kc-host-tag"><Crown size={11}/> Host</span>}
-                    </div>
-                  ))}
-                </div>
-
-                {isHost && (
-                  <div className="kc-host-tabs">
-                    <button type="button" className={roomData.gameMode === "lobby" ? "active" : ""} onClick={() => setRoomMode(activeRoomId, user!.uid, "lobby")}>Lobby</button>
-                    <button type="button" className={roomData.gameMode === "hottakes" ? "active" : ""} onClick={() => setRoomMode(activeRoomId, user!.uid, "hottakes")}>Hot Takes</button>
-                    <button type="button" className={roomData.gameMode === "hypotheticals" ? "active" : ""} onClick={() => setRoomMode(activeRoomId, user!.uid, "hypotheticals")}>If E Reach Your Turn</button>
-                    <button type="button" className={roomData.gameMode === "spinner" ? "active" : ""} onClick={handleStartSpinner}>Kingdom Spinner</button>
-                  </div>
-                )}
-
-                {roomData.gameMode === "lobby" && (
-                  <div className="kc-room-empty" style={{ textAlign: "center", padding: "40px 20px" }}>
-                    <Gamepad2 size={32} color="#285541"/>
-                    <h2>Lobby Waiting Room</h2>
-                    <p>{isHost ? "Choose a game mode from the tabs above to start the vibe check." : "Waiting for host to pick a game..."}</p>
-                  </div>
-                )}
-
-             {roomData.gameMode === "hottakes" && (
+                {roomData.gameMode === "hottakes" && (
   <div className="kc-wyr-panel">
     <div className="kc-eyebrow">
       HOT TAKE #{ (roomData.currentQuestionIdx % HOT_TAKES.length) + 1 } · {currentHotTake.category}
@@ -702,11 +590,7 @@ useEffect(() => {
                     </div>
                   ))
                 ) : (
-                  
-<span style={{ fontSize: 11, color: "#aaa", fontStyle: "italic" }}>
-  No votes yet
-</span>
-
+                  <span style={{ fontSize: 11, color: "#aaa", fontStyle: "italic" }}>No votes yet</span>
                 )}
               </div>
             </div>
@@ -745,7 +629,6 @@ useEffect(() => {
     </div>
   </div>
 )}
-
                {roomData.gameMode === "hypotheticals" && (
   <div className="kc-truths-panel">
     <div className="kc-eyebrow">IF E REACH YOUR TURN</div>
@@ -845,12 +728,13 @@ useEffect(() => {
   </div>
 )}
 
+
                 {roomData.gameMode === "spinner" && spinnerGame && (
                   <div className="kc-wyr-panel kc-spinner-panel">
                     <div className="kc-eyebrow">KINGDOM SPINNER · ROUND {spinnerGame.round} OF {spinnerGame.totalRounds}</div>
                     <div className="kc-spinner-layout">
                       <div className="kc-spinner-main">
-                        {spinnerGame.phase === "spinning" && (
+                       {spinnerGame.phase === "spinning" && (
   <div className="kc-spinner-card-inner kc-enter" style={{ textAlign: "center" }}>
     <h2>Spin for your category!</h2>
     <p style={{ fontSize: 13, color: "#666" }}>Tap the center wheel to spin and lock in your Bible category.</p>
@@ -897,6 +781,7 @@ useEffect(() => {
     </div>
   </div>
 )}
+
                         {spinnerGame.phase === "answering" && (
                           <div className="kc-spinner-card-inner kc-enter">
                             <div className="kc-spinner-timer-row">
@@ -911,7 +796,7 @@ useEffect(() => {
                                   {spinnerQuestion.options.map((option, index) => {
                                     const myAnswer = user ? spinnerGame.answers[user.uid] : undefined;
                                     return (
-                                     <button 
+                                      <button 
   key={index} 
   disabled={!!myAnswer} // Lock button only after THEY answer (removed the rigid timer lock)
   className={`kc-answer ${myAnswer?.selectedIndex === index ? "selected" : ""}`} 
