@@ -520,6 +520,34 @@ export default function KingdomConnectionsApp() {
               <div className="kc-room-view">
                 {/* Active room content continues here... */}
 
+   <div className="kc-room-header">
+                  <div>
+                    <div className="kc-eyebrow">ROOM CODE</div>
+                    <h1><span>{activeRoomId}</span></h1>
+                    <p>{roomPlayers.length} player{roomPlayers.length === 1 ? "" : "s"} inside</p>
+                  </div>
+                  <button className="kc-button kc-button-outline" onClick={() => shareText(`Join my Kingdom Connections room! Code: ${activeRoomId}`)} type="button"><Share2 size={15}/> Share Room</button>
+                </div>
+
+                <div className="kc-player-strip">
+                  {roomPlayers.map((p) => (
+                    <div className="kc-player-chip" key={p.uid}>
+                      <span>{p.avatar}</span><b>{p.name}</b>
+                      {p.isHost && <span className="kc-host-tag"><Crown size={11}/> Host</span>}
+                    </div>
+                  ))}
+                </div>
+
+                {isHost && (
+                  <div className="kc-host-tabs">
+                    <button type="button" className={roomData.gameMode === "lobby" ? "active" : ""} onClick={() => setRoomMode(activeRoomId, user!.uid, "lobby")}>Lobby</button>
+                    <button type="button" className={roomData.gameMode === "hottakes" ? "active" : ""} onClick={() => setRoomMode(activeRoomId, user!.uid, "hottakes")}>Hot Takes</button>
+                    <button type="button" className={roomData.gameMode === "hypotheticals" ? "active" : ""} onClick={() => setRoomMode(activeRoomId, user!.uid, "hypotheticals")}>If E Reach Your Turn</button>
+                    <button type="button" className={roomData.gameMode === "spinner" ? "active" : ""} onClick={handleStartSpinner}>Kingdom Spinner</button>
+                  </div>
+                )}
+
+
                 {roomData.gameMode === "hottakes" && (
   <div className="kc-wyr-panel">
     <div className="kc-eyebrow">
