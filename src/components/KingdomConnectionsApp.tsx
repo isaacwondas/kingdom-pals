@@ -166,26 +166,36 @@ export default function KingdomConnectionsApp() {
     }, (error) => notify(error.message, "error"));
   }, [user, activeRoomId]);
 
+
+
 useEffect(() => {
-  const reaction = (roomData as any)?.latestReaction;
+  const reaction = roomData?.latestReaction;
 
+  if (!reaction?.id || !reaction?.emoji) return;
 
-  // Only trigger if a reaction exists and arrived in the last 3 seconds
-  if (reaction && reaction.createdAt > Date.now() - 3000) {
-    const newFlyingEmoji = {
-      id: reaction.id,
-      emoji: reaction.emoji
-    };
+  const newFlyingEmoji = {
+    id: Number.parseInt(reaction.id, 36) || Date.now(),
+    emoji: reaction.emoji,
+  };
 
-    // Trigger local animation across all connected players!
-    setFlyingEmojis((prev) => [...prev, newFlyingEmoji]);
+  setFlyingEmojis((prev) => {
+    if (prev.some((item) => item.id === newFlyingEmoji.id)) {
+      return prev;
+    }
 
-    // Automatically clean up floating emoji after animation completes (2s)
-    setTimeout(() => {
-      setFlyingEmojis((prev) => prev.filter((item) => item.id !== reaction.id));
-    }, 2000);
-  }
+    return [...prev, newFlyingEmoji];
+  });
+
+  const timeoutId = window.setTimeout(() => {
+    setFlyingEmojis((prev) =>
+      prev.filter((item) => item.id !== newFlyingEmoji.id)
+    );
+  }, 2000);
+
+  return () => window.clearTimeout(timeoutId);
 }, [roomData?.latestReaction?.id]);
+
+
 
   useEffect(() => {
     const game = roomData?.spinnerGame as any;
