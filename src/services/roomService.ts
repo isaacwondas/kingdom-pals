@@ -70,6 +70,7 @@ export type RoomData = {
   createdAt?: unknown;
   players: Record<string, Player>;
   spinnerGame?: SpinnerGameState;
+  shuffledIndices?: number[];
   latestReaction?: {
     id: string;
     emoji: string;

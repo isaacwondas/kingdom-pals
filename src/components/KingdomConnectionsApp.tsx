@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { shuffleArray } from "../utils/helpers";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -116,6 +117,40 @@ export default function KingdomConnectionsApp() {
   const [icebreaker, setIcebreaker] = useState(0);
   const [flyingEmojis, setFlyingEmojis] = useState<{ id: number; emoji: string }[]>([]);
   const [spinnerSecondsLeft, setSpinnerSecondsLeft] = useState(20);
+
+const startRandomGame = async (gameModeName: string, totalQuestions: number) => {
+  if (!activeRoomId) return;
+
+  // 1. Generate index array [0, 1, 2, ... N] and shuffle it universally
+  const indices = Array.from({ length: totalQuestions }, (_, i) => i);
+  const randomizedDeck = shuffleArray(indices);
+
+  // 2. Save to room with the game mode in one go
+  const roomRef = doc(db, "rooms", activeRoomId);
+  await updateDoc(roomRef, {
+    gameMode: gameModeName,
+    currentQuestionIdx: 0,
+    shuffledIndices: randomizedDeck // Works for Hot Takes, If E Reach Your Turn, etc.
+  });
+};
+
+
+  const getActiveQuestion = (questionsArray: any[]) => {
+    if (!questionsArray || questionsArray.length === 0) return null;
+    
+    const currentIndex = roomData?.currentQuestionIdx || 0;
+    const deck = roomData?.shuffledIndices;
+
+    // If a shuffled deck exists, use it. Otherwise fallback to normal order.
+    const actualIndex = deck && deck[currentIndex] !== undefined ? deck[currentIndex] : currentIndex;
+    
+    return questionsArray[actualIndex];
+  };
+
+
+  // -------------------------------------------------------------
+  // 3. YOUR UI RENDER STARTS HERE
+  // -------------------------------------------------------------
 
 const sendEmoji = async (emoji: string) => {
   if (!activeRoomId || !user) return;
