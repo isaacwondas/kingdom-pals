@@ -304,17 +304,48 @@ useEffect(() => {
   });
 };
   const handleSpinnerAnswer = async (selectedIndex: number) => {
-    if (!user || !activeRoomId || !spinnerQuestion) return;
-    try {
-      await submitSpinnerAnswer(activeRoomId, user.uid, selectedIndex, spinnerQuestion.correctIndex);
-      notify(selectedIndex === spinnerQuestion.correctIndex ? "Correct! +10 points." : "Answer submitted.");
-    } catch (error) { notify(errorMessage(error), "error"); }
-  };
+  if (!user || !activeRoomId || !spinnerQuestion) return;
 
-  const handleShowSpinnerResults = async () => {
-    if (!user || !activeRoomId) return;
-    try { await showSpinnerResults(activeRoomId, user.uid); } catch (error) { notify(errorMessage(error), "error"); }
-  };
+  try {
+    const isCorrect = selectedIndex === spinnerQuestion.correctIndex;
+    const roomRef = doc(db, "rooms", activeRoomId);
+
+    // 1. Record individual answer
+    await updateDoc(roomRef, {
+      [`spinnerGame.answers.${user.uid}`]: {
+        selectedIndex,
+        isCorrect,
+        answeredAt: Date.now()
+      }
+    });
+
+    // 2. If correct, increment player score by 10 points!
+    if (isCorrect) {
+      const currentScore = spinnerGame?.scores?.[user.uid] || 0;
+      await updateDoc(roomRef, {
+        [`spinnerGame.scores.${user.uid}`]: currentScore + 10
+      });
+      notify("Correct! +10 points 🎯");
+    } else {
+      notify("Answer recorded!");
+    }
+  } catch (err: any) {
+    console.error("Error submitting answer:", err);
+  }
+};
+
+const handleShowSpinnerResults = async () => {
+  if (!activeRoomId || !user) return;
+
+  try {
+    const roomRef = doc(db, "rooms", activeRoomId);
+    await updateDoc(roomRef, {
+      "spinnerGame.phase": "results"
+    });
+  } catch (err: any) {
+    console.error("Error transitioning to results:", err);
+  }
+};
 
   const handleAdvanceSpinner = async () => {
     if (!user || !activeRoomId) return;
@@ -888,18 +919,23 @@ useEffect(() => {
                       </div>
 
                       <aside className="kc-spinner-leaderboard">
-                        <div className="kc-eyebrow">STANDINGS</div>
-                        <div className="kc-leaderboard-list">
-                          {spinnerLeaderboard.map((p, idx) => (
-                            <div className="kc-player-chip kc-leaderboard-chip" key={p.uid}>
-                              <span className="kc-rank-num">#{idx + 1}</span>
-                              <span>{p.avatar}</span>
-                              <b>{p.name}</b>
-                              <span style={{ marginLeft: "auto", fontWeight: 700 }}>{spinnerGame.scores[p.uid] ?? 0}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </aside>
+  <div className="kc-eyebrow">STANDINGS</div>
+  <div className="kc-leaderboard-list">
+    {roomPlayers
+      .slice()
+      .sort((a, b) => (spinnerGame?.scores?.[b.uid] ?? 0) - (spinnerGame?.scores?.[a.uid] ?? 0))
+      .map((p, idx) => (
+        <div className="kc-player-chip kc-leaderboard-chip" key={p.uid}>
+          <span className="kc-rank-num">#{idx + 1}</span>
+          <span>{p.avatar}</span>
+          <b>{p.name}</b>
+          <span style={{ marginLeft: "auto", fontWeight: 700, color: "#285541" }}>
+            {spinnerGame?.scores?.[p.uid] ?? 0} pts
+          </span>
+        </div>
+      ))}
+  </div>
+</aside>
                     </div>
                   </div>
                 )}
