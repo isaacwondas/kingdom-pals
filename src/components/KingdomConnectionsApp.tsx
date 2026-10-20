@@ -36,7 +36,7 @@ import {
   X,
 } from "lucide-react";
 import { auth, db } from "../lib/firebase";
-import { BIBLE_QUESTIONS, ICEBREAKER_PROMPTS, MULTIPLAYER_QUESTIONS } from "../data/questions";
+import { BIBLE_QUESTIONS, ICEBREAKER_PROMPTS, MULTIPLAYER_QUESTIONS, WYR_QUESTIONS } from "../data/questions";
 import { HOT_TAKES, HYPOTHETICALS } from "../data/questions";
 import {
   createRoom,
@@ -146,7 +146,8 @@ const startRandomGame = async (gameModeName: string, totalQuestions: number) => 
     
     return questionsArray[actualIndex];
   };
-
+const currentMultiplayerQuestion = getActiveQuestion(MULTIPLAYER_QUESTIONS);
+  const currentWyrQuestion = getActiveQuestion(WYR_QUESTIONS);
 
   // -------------------------------------------------------------
   // 3. YOUR UI RENDER STARTS HERE
