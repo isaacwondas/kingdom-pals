@@ -117,22 +117,19 @@ export default function KingdomConnectionsApp() {
   const [flyingEmojis, setFlyingEmojis] = useState<{ id: number; emoji: string }[]>([]);
   const [spinnerSecondsLeft, setSpinnerSecondsLeft] = useState(20);
 
-  const sendEmoji = async (emoji: string) => {
+const sendEmoji = async (emoji: string) => {
   if (!activeRoomId || !user) return;
 
   try {
     const roomRef = doc(db, "rooms", activeRoomId);
     
-    // Add reaction with a unique ID and timestamp so all clients pick it up
-    const reaction = {
-      id: Math.random().toString(36).substring(2, 9),
-      emoji,
-      senderName: name || "Player",
-      createdAt: Date.now()
-    };
-
     await updateDoc(roomRef, {
-      latestReaction: reaction
+      latestReaction: {
+        id: Math.random().toString(36).substring(2, 9),
+        emoji,
+        senderName: name || "Player",
+        createdAt: Date.now()
+      }
     });
   } catch (err: any) {
     console.error("Could not send emoji reaction:", err);
