@@ -70,6 +70,12 @@ export type RoomData = {
   createdAt?: unknown;
   players: Record<string, Player>;
   spinnerGame?: SpinnerGameState;
+  latestReaction?: {
+    id: string;
+    emoji: string;
+    senderName: string;
+    createdAt: number;
+  };
 };
 
 // --- Firebase Reference Helpers ---
@@ -270,6 +276,8 @@ const SPINNER_CATEGORIES: SpinnerCategory[] = [
   "Love Languages",
   "Christian Hymns",
 ];
+
+
 
 export async function startSpinnerMatch(roomId: string, uid: string) {
   const ref = roomRef(roomId);

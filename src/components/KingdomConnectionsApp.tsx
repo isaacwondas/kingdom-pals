@@ -93,6 +93,7 @@ function shareText(text: string) {
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
+
 export default function KingdomConnectionsApp() {
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
@@ -116,14 +117,27 @@ export default function KingdomConnectionsApp() {
   const [flyingEmojis, setFlyingEmojis] = useState<{ id: number; emoji: string }[]>([]);
   const [spinnerSecondsLeft, setSpinnerSecondsLeft] = useState(20);
 
-  const sendEmoji = (emoji: string) => {
-    sounds.playPop();
-    const id = Date.now();
-    setFlyingEmojis((prev) => [...prev, { id, emoji }]);
-    setTimeout(() => {
-      setFlyingEmojis((prev) => prev.filter((item) => item.id !== id));
-    }, 2000);
-  };
+  const sendEmoji = async (emoji: string) => {
+  if (!activeRoomId || !user) return;
+
+  try {
+    const roomRef = doc(db, "rooms", activeRoomId);
+    
+    // Add reaction with a unique ID and timestamp so all clients pick it up
+    const reaction = {
+      id: Math.random().toString(36).substring(2, 9),
+      emoji,
+      senderName: name || "Player",
+      createdAt: Date.now()
+    };
+
+    await updateDoc(roomRef, {
+      latestReaction: reaction
+    });
+  } catch (err: any) {
+    console.error("Could not send emoji reaction:", err);
+  }
+};
 
   const notify = (message: string, type: "success" | "error" = "success") => {
     setToast({ message, type });
@@ -151,6 +165,27 @@ export default function KingdomConnectionsApp() {
       }
     }, (error) => notify(error.message, "error"));
   }, [user, activeRoomId]);
+
+useEffect(() => {
+  const reaction = (roomData as any)?.latestReaction;
+
+
+  // Only trigger if a reaction exists and arrived in the last 3 seconds
+  if (reaction && reaction.createdAt > Date.now() - 3000) {
+    const newFlyingEmoji = {
+      id: reaction.id,
+      emoji: reaction.emoji
+    };
+
+    // Trigger local animation across all connected players!
+    setFlyingEmojis((prev) => [...prev, newFlyingEmoji]);
+
+    // Automatically clean up floating emoji after animation completes (2s)
+    setTimeout(() => {
+      setFlyingEmojis((prev) => prev.filter((item) => item.id !== reaction.id));
+    }, 2000);
+  }
+}, [roomData?.latestReaction?.id]);
 
   useEffect(() => {
     const game = roomData?.spinnerGame as any;
@@ -343,7 +378,7 @@ export default function KingdomConnectionsApp() {
       <header className="kc-header">
         <button className="kc-brand" onClick={() => setView("home")} aria-label="Kingdom Connections home">
           <span className="kc-brand-mark"><Crown size={22}/></span>
-          <span><strong>Kingdom Connections</strong><small>Faith · Friendship · Fellowship</small></span>
+          <span><strong>Kingdom Gen Z</strong><small>Faith · Friendship · Fellowship</small></span>
         </button>
         <div className="kc-header-actions">
           {user ? <button className="kc-user-chip" onClick={() => setView("profile")}><span>{avatar}</span><span className="kc-user-chip-name">{name || user.displayName || "Player"}</span><ChevronRight size={14}/></button> : <button className="kc-button kc-button-small" onClick={startGuest}>Play as guest</button>}
@@ -367,7 +402,7 @@ export default function KingdomConnectionsApp() {
                 <div className="kc-feature-label">VIBE CHECK</div>
                 <div className="kc-feature-quote">“No boring small talk. Straight to the gist.”</div>
                 <div className="kc-feature-divider"/>
-                <p>Designed for TwitterNG, TikTok, and Christian singles ready for intentional connections.</p>
+                <p>Designed for TwitterNG, TikTok, and Christian GenZ.</p>
                 <div className="kc-feature-footer"><span>FAITH</span><span>RELATIONSHIPS</span><span>VIBES</span></div>
               </div>
             </section>
@@ -526,7 +561,7 @@ export default function KingdomConnectionsApp() {
                     <h1><span>{activeRoomId}</span></h1>
                     <p>{roomPlayers.length} player{roomPlayers.length === 1 ? "" : "s"} inside</p>
                   </div>
-                  <button className="kc-button kc-button-outline" onClick={() => shareText(`Join my Kingdom Connections room! Code: ${activeRoomId}`)} type="button"><Share2 size={15}/> Share Room</button>
+                  <button className="kc-button kc-button-outline" onClick={() => shareText(`Join my Kingdom Gen Z room! Code: ${activeRoomId}`)} type="button"><Share2 size={15}/> Share Room</button>
                 </div>
 
                 <div className="kc-player-strip">
