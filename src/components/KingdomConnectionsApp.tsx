@@ -268,8 +268,9 @@ useEffect(() => {
     (a, b) => (spinnerGame?.scores[b.uid] ?? 0) - (spinnerGame?.scores[a.uid] ?? 0)
   );
 
-  const currentHotTake = HOT_TAKES[(roomData?.currentQuestionIdx || 0) % HOT_TAKES.length];
-  const currentHypothetical = HYPOTHETICALS[(roomData?.currentQuestionIdx || 0) % HYPOTHETICALS.length];
+ // ✅ Fixed code (Randomized)
+const currentHotTake = getActiveQuestion(HOT_TAKES);
+const currentHypothetical = getActiveQuestion(HYPOTHETICALS);
 
   const startGuest = async () => {
     setBusy(true);
@@ -648,13 +649,18 @@ const handleShowSpinnerResults = async () => {
                 </div>
 
                 {isHost && (
-                  <div className="kc-host-tabs">
-                    <button type="button" className={roomData.gameMode === "lobby" ? "active" : ""} onClick={() => setRoomMode(activeRoomId, user!.uid, "lobby")}>Lobby</button>
-                    <button type="button" className={roomData.gameMode === "hottakes" ? "active" : ""} onClick={() => setRoomMode(activeRoomId, user!.uid, "hottakes")}>Hot Takes</button>
-                    <button type="button" className={roomData.gameMode === "hypotheticals" ? "active" : ""} onClick={() => setRoomMode(activeRoomId, user!.uid, "hypotheticals")}>If E Reach Your Turn</button>
-                    <button type="button" className={roomData.gameMode === "spinner" ? "active" : ""} onClick={handleStartSpinner}>Kingdom Spinner</button>
-                  </div>
-                )}
+  <div className="kc-host-tabs">
+    <button type="button" className={roomData.gameMode === "lobby" ? "active" : ""} onClick={() => setRoomMode(activeRoomId, user!.uid, "lobby")}>Lobby</button>
+    
+    {/* Use startRandomGame for Hot Takes */}
+    <button type="button" className={roomData.gameMode === "hottakes" ? "active" : ""} onClick={() => startRandomGame("hottakes", HOT_TAKES.length)}>Hot Takes</button>
+    
+    {/* Use startRandomGame for If E Reach Your Turn */}
+    <button type="button" className={roomData.gameMode === "hypotheticals" ? "active" : ""} onClick={() => startRandomGame("hypotheticals", HYPOTHETICALS.length)}>If E Reach Your Turn</button>
+    
+    <button type="button" className={roomData.gameMode === "spinner" ? "active" : ""} onClick={handleStartSpinner}>Kingdom Spinner</button>
+  </div>
+)}
 
 
                 {roomData.gameMode === "hottakes" && (

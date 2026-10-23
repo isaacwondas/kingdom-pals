@@ -215,6 +215,7 @@ export const MULTIPLAYER_QUESTIONS: MultiplayerQuestion[] = [
     correctIndex: 1,
     explanation: "Joseph was sold by his brothers. (Genesis 37)",
   },
+  
 
   // ========== LOVE LANGUAGES ==========
   {
@@ -889,107 +890,12 @@ export const WYR_QUESTIONS: WouldYouRatherQuestion[] = [
     optionA: "Serve in the same ministry",
     optionB: "Serve in different ministries and share experiences",
   },
-  {
-    id: "wyr-3",
-    title: "Communication",
-    optionA: "Talk through a disagreement in person",
-    optionB: "Write thoughts down first, then talk",
-  },
-  {
-    id: "wyr-4",
-    title: "Celebration",
-    optionA: "A large celebration with everyone",
-    optionB: "A small, intimate gathering",
-  },
-  {
-    id: "wyr-5",
-    title: "Date Style",
-    optionA: "Long walk and deep talk after church",
-    optionB: "Nice dinner and laughter",
-  },
-  {
-    id: "wyr-6",
-    title: "Future Home",
-    optionA: "Live close to family and church community",
-    optionB: "Live wherever the best opportunities are",
-  },
-  {
-    id: "wyr-7",
-    title: "Conflict Style",
-    optionA: "Pray first, then discuss",
-    optionB: "Discuss first, then pray together",
-  },
-  {
-    id: "wyr-8",
-    title: "Social Media",
-    optionA: "Keep relationship mostly private",
-    optionB: "Share selected moments openly",
-  },
-  {
-    id: "wyr-9",
-    title: "Ministry Priority",
-    optionA: "Both heavily involved in church",
-    optionB: "One more focused on career, one more on ministry",
-  },
-  {
-    id: "wyr-10",
-    title: "Money Talk",
-    optionA: "Discuss finances early in dating",
-    optionB: "Wait until things are more serious",
-  },
-  {
-    id: "wyr-11",
-    title: "Holiday Preference",
-    optionA: "Quiet staycation and rest",
-    optionB: "Travel and explore new places",
-  },
-  {
-    id: "wyr-12",
-    title: "Worship Style",
-    optionA: "Loud praise and dancing",
-    optionB: "Quiet, reflective worship",
-  },
-  {
-    id: "wyr-13",
-    title: "Family Introduction",
-    optionA: "Introduce early if serious",
-    optionB: "Wait until engagement is close",
-  },
-  {
-    id: "wyr-14",
-    title: "Busy Season",
-    optionA: "Scheduled weekly quality time no matter what",
-    optionB: "Flexible timing based on energy",
-  },
-  {
-    id: "wyr-15",
-    title: "Advice Source",
-    optionA: "Trusted mentors and pastors",
-    optionB: "Close friends who know you well",
-  },
+  
 ];
 
 export const ICEBREAKER_PROMPTS: string[] = [
   "What is one lesson that has shaped your faith?",
-  "Which skill would you love to learn this year?",
-  "What does a supportive friendship look like to you?",
-  "What is one thing you are grateful for this week?",
-  "Which Bible character would you like to have a conversation with, and why?",
-  "What does a peaceful morning look like for you?",
-  "How do you usually recharge after a long week?",
-  "What is one value you refuse to compromise on in a relationship?",
-  "Which Nigerian gospel song currently blesses you the most?",
-  "What is the best piece of advice you've received about waiting well?",
-  "How do you handle seasons of silence from God?",
-  "What kind of date feels most natural and fun to you?",
-  "What does 'soft life' mean to you as a believer?",
-  "Which fruit of the Spirit are you intentionally growing in right now?",
-  "What is one childhood memory that still makes you smile?",
-  "How do you prefer to celebrate small wins?",
-  "What does healthy communication look like to you?",
-  "If you could serve in any ministry for a year, which would it be?",
-  "What is one thing that makes you feel truly seen?",
-  "How do you usually respond when plans suddenly change?",
+  
 ];
 
 export type HotTakeQuestion = {
@@ -1155,6 +1061,256 @@ export const HOT_TAKES: HotTakeQuestion[] = [
     statement: "Paying bride price does not automatically make a man a good husband.",
     category: "Lifestyle",
   },
+  {
+  id: "ht_31",
+  statement: "If someone is serious about you, you shouldn't have to decode their intentions like WAEC questions.",
+  category: "Relationships",
+},
+{
+  id: "ht_32",
+  statement: "A relationship without difficult conversations before marriage is just an expensive surprise waiting to happen.",
+  category: "Relationships",
+},
+{
+  id: "ht_33",
+  statement: "Being someone's prayer partner for two years without defining the relationship is unpaid emotional labour.",
+  category: "Faith",
+},
+{
+  id: "ht_34",
+  statement: "A man who expects submission but refuses accountability has misunderstood biblical leadership.",
+  category: "Faith",
+},
+{
+  id: "ht_35",
+  statement: "If your partner cannot celebrate your success without feeling threatened, love is not the only issue.",
+  category: "Relationships",
+},
+{
+  id: "ht_36",
+  statement: "Dating for marriage doesn't mean you must marry the first person you date.",
+  category: "Relationships",
+},
+{
+  id: "ht_37",
+  statement: "A wedding that impresses Instagram but leaves the couple in debt is not a financial flex.",
+  category: "Lifestyle",
+},
+{
+  id: "ht_38",
+  statement: "If both partners are earning, both should contribute to building their future, even if the amounts differ.",
+  category: "Lifestyle",
+},
+{
+  id: "ht_39",
+  statement: "A person can be anointed in church and still be emotionally immature in a relationship.",
+  category: "Faith",
+},
+{
+  id: "ht_40",
+  statement: "Forgiveness is biblical, but it doesn't mean you must keep giving someone access to hurt you.",
+  category: "Faith",
+},
+{
+  id: "ht_41",
+  statement: "If your partner only remembers you when they're lonely at midnight, you're not necessarily their priority.",
+  category: "Relationships",
+},
+{
+  id: "ht_42",
+  statement: "Chemistry can start a relationship, but shared values are what help it survive.",
+  category: "Relationships",
+},
+{
+  id: "ht_43",
+  statement: "A couple should discuss debts, savings, and financial responsibilities before getting engaged.",
+  category: "Lifestyle",
+},
+{
+  id: "ht_44",
+  statement: "Using 'God told me' to prevent your partner from asking questions is spiritual manipulation.",
+  category: "Faith",
+},
+{
+  id: "ht_45",
+  statement: "Not every private relationship is a secret relationship, but secrecy without explanation deserves questions.",
+  category: "Relationships",
+},
+{
+  id: "ht_46",
+  statement: "If you cannot disagree respectfully while dating, marriage will not magically teach you how.",
+  category: "Relationships",
+},
+{
+  id: "ht_47",
+  statement: "A partner's relationship with money tells you something about their priorities, not their entire character.",
+  category: "Lifestyle",
+},
+{
+  id: "ht_48",
+  statement: "Marriage should not be treated as a reward for enduring a bad relationship.",
+  category: "Relationships",
+},
+{
+  id: "ht_49",
+  statement: "Church attendance is important to many Christians, but character outside church matters just as much.",
+  category: "Faith",
+},
+{
+  id: "ht_50",
+  statement: "If your entire relationship depends on one person always making sacrifices, something needs to change.",
+  category: "Relationships",
+},
+{
+  id: "ht_51",
+  statement: "A man can be financially responsible without paying for every single thing in a relationship.",
+  category: "Lifestyle",
+},
+{
+  id: "ht_52",
+  statement: "A woman earning more than her partner is not a relationship problem unless insecurity makes it one.",
+  category: "Lifestyle",
+},
+{
+  id: "ht_53",
+  statement: "Praying about a relationship and checking for compatibility should go hand in hand.",
+  category: "Faith",
+},
+{
+  id: "ht_54",
+  statement: "If your partner cannot respect your boundaries while dating, a wedding ring will not fix the problem.",
+  category: "Relationships",
+},
+{
+  id: "ht_55",
+  statement: "Being ready for marriage is about more than reaching a particular age.",
+  category: "Relationships",
+},
+{
+  id: "ht_56",
+  statement: "A relationship can survive distance more easily when both people agree on a realistic plan to reunite.",
+  category: "Relationships",
+},
+{
+  id: "ht_57",
+  statement: "Your pastor can offer wise counsel, but you are still responsible for making an informed relationship decision.",
+  category: "Faith",
+},
+{
+  id: "ht_58",
+  statement: "Buying your partner expensive gifts cannot compensate for consistently being emotionally unavailable.",
+  category: "Lifestyle",
+},
+{
+  id: "ht_59",
+  statement: "If you need to hide your relationship from every important person in your life, ask yourself why.",
+  category: "Relationships",
+},
+{
+  id: "ht_60",
+  statement: "A couple that cannot discuss sex, boundaries, and expectations before marriage is avoiding important conversations.",
+  category: "Relationships",
+},
+{
+  id: "ht_61",
+  statement: "Being busy with church work is not an excuse for repeatedly neglecting the people you have committed to.",
+  category: "Faith",
+},
+{
+  id: "ht_62",
+  statement: "A person's potential is attractive, but you should not marry a future version of someone who refuses to grow today.",
+  category: "Relationships",
+},
+{
+  id: "ht_63",
+  statement: "Traditional marriage expenses should reflect the couple's reality, not a competition between families.",
+  category: "Lifestyle",
+},
+{
+  id: "ht_64",
+  statement: "If you cannot tell your partner the truth because you fear their reaction, the relationship needs attention.",
+  category: "Relationships",
+},
+{
+  id: "ht_65",
+  statement: "A couple should agree on how much influence extended family will have in their marriage before the wedding.",
+  category: "Relationships",
+},
+{
+  id: "ht_66",
+  statement: "Being equally yoked should include conversations about children, work, money, and family expectations.",
+  category: "Faith",
+},
+{
+  id: "ht_67",
+  statement: "You can love someone deeply and still recognise that you are not compatible for marriage.",
+  category: "Relationships",
+},
+{
+  id: "ht_68",
+  statement: "A soft life built on debt and appearances is not financial freedom.",
+  category: "Lifestyle",
+},
+{
+  id: "ht_69",
+  statement: "A partner who celebrates your spiritual growth should also respect your personal growth and ambitions.",
+  category: "Faith",
+},
+{
+  id: "ht_70",
+  statement: "Apologising without changing the behaviour is just repeating the same mistake with better packaging.",
+  category: "Relationships",
+},
+{
+  id: "ht_71",
+  statement: "A couple should be able to enjoy simple dates without one person feeling that love must always be expensive.",
+  category: "Lifestyle",
+},
+{
+  id: "ht_72",
+  statement: "Waiting for marriage should be a shared conviction, not a rule one partner uses to control the other.",
+  category: "Faith",
+},
+{
+  id: "ht_73",
+  statement: "If your partner constantly compares you with their ex, they may not be ready to build something new.",
+  category: "Relationships",
+},
+{
+  id: "ht_74",
+  statement: "You should discuss how to care for ageing parents before marriage, not when the first emergency arrives.",
+  category: "Lifestyle",
+},
+{
+  id: "ht_75",
+  statement: "A person who says they are too busy to communicate may simply have different relationship priorities from yours.",
+  category: "Relationships",
+},
+{
+  id: "ht_76",
+  statement: "Christian courtship should involve discernment and accountability, not endless pressure to prove your spirituality.",
+  category: "Faith",
+},
+{
+  id: "ht_77",
+  statement: "Your partner does not have to share every hobby with you, but they should respect the things that matter to you.",
+  category: "Relationships",
+},
+{
+  id: "ht_78",
+  statement: "Financial stability matters, but marrying someone only for their earning potential can leave important compatibility questions unanswered.",
+  category: "Lifestyle",
+},
+{
+  id: "ht_79",
+  statement: "A wedding is one day; the marriage is the life you must learn to build together afterward.",
+  category: "Relationships",
+},
+{
+  id: "ht_80",
+  statement: "Sometimes the most spiritual relationship decision is admitting that a relationship is unhealthy and seeking wise help.",
+  category: "Faith",
+},
 ];
 
 export const HYPOTHETICALS: HypotheticalScenario[] = [
@@ -1258,4 +1414,254 @@ export const HYPOTHETICALS: HypotheticalScenario[] = [
     scenario: "A big family crisis happens the same weekend as a planned proposal. What do you prioritise?",
     category: "Vibes & Dating",
   },
+  {
+  id: "mp-hyp_21",
+  scenario: "Your partner earns ₦2 million monthly while you earn ₦200,000. How do you share expenses without making either person feel inferior?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_22",
+  scenario: "You discover your partner has been secretly supporting a family member financially every month. Is it a betrayal or an act of love?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_23",
+  scenario: "You receive ₦10 million unexpectedly, but your partner has outstanding debts. Do you help, invest, or protect your money?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_24",
+  scenario: "Your partner wants a lavish wedding, but you both need the money for rent, business, and future plans. What is your compromise?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_25",
+  scenario: "Your partner's business fails after you both invest your savings. How do you rebuild financially without blaming each other?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_26",
+  scenario: "Your partner asks to see your bank balance to prove you are financially ready for marriage. Would you agree?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_27",
+  scenario: "You discover that your partner has been borrowing money from friends to maintain an expensive lifestyle. How do you address it?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_28",
+  scenario: "You both receive ₦5 million, but one person wants to buy a car while the other wants to start a business. How do you decide?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_29",
+  scenario: "Your partner loses their job six months before your wedding. Do you postpone the wedding or proceed with a simpler plan?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_30",
+  scenario: "Your partner insists that every financial decision must be approved by them because they earn more. How would you respond?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_31",
+  scenario: "You get a scholarship abroad, but your partner cannot relocate for another three years. How do you protect the relationship?",
+  category: "Japa & Romance",
+},
+{
+  id: "mp-hyp_32",
+  scenario: "Your partner relocates abroad and suddenly becomes less available, claiming that work and adjustment are overwhelming. What do you do?",
+  category: "Japa & Romance",
+},
+{
+  id: "mp-hyp_33",
+  scenario: "You receive a visa approval on the same day your partner asks you to start marriage preparations. Which conversation happens first?",
+  category: "Japa & Romance",
+},
+{
+  id: "mp-hyp_34",
+  scenario: "Your partner wants to return to Nigeria permanently, but you have built a successful life abroad. How do you reach a decision?",
+  category: "Japa & Romance",
+},
+{
+  id: "mp-hyp_35",
+  scenario: "You discover that your partner accepted a job abroad without discussing it with you. Is this a deal-breaker or something you can work through?",
+  category: "Japa & Romance",
+},
+{
+  id: "mp-hyp_36",
+  scenario: "Your partner's family expects you to relocate to their state after marriage, but your dream job is elsewhere. What is your next move?",
+  category: "Japa & Romance",
+},
+{
+  id: "mp-hyp_37",
+  scenario: "You both move abroad, but one person struggles to find a job while the other thrives. How do you manage the change in roles?",
+  category: "Japa & Romance",
+},
+{
+  id: "mp-hyp_38",
+  scenario: "Your partner says long-distance relationships cannot work and wants you to decide between relocating and ending things. How do you respond?",
+  category: "Japa & Romance",
+},
+{
+  id: "mp-hyp_39",
+  scenario: "You get an opportunity to study in Canada, but your partner believes you should wait until after marriage. What factors influence your decision?",
+  category: "Japa & Romance",
+},
+{
+  id: "mp-hyp_40",
+  scenario: "You discover that your partner has been sending money home abroad without budgeting for your shared goals. How do you handle it?",
+  category: "Japa & Romance",
+},
+{
+  id: "mp-hyp_41",
+  scenario: "Your partner forgets your birthday but remembers every detail of their friends' birthdays. Do you confront them, laugh it off, or reconsider your expectations?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_42",
+  scenario: "Your partner posts everyone on social media except you. Does it bother you, and how would you discuss it?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_43",
+  scenario: "You are having a serious disagreement, but your partner insists on sleeping before resolving it. Do you respect their need for rest or insist on talking?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_44",
+  scenario: "Your partner is perfect in private but makes jokes about you in front of friends. How do you address the difference?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_45",
+  scenario: "Your partner's ex suddenly sends a message saying they still have feelings for them. What would you expect your partner to do?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_46",
+  scenario: "You discover that your partner has a completely different sense of humour and finds your jokes offensive. How do you adjust without losing yourself?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_47",
+  scenario: "Your partner wants to spend every weekend together, but you need personal time and friendships. How do you establish a healthy balance?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_48",
+  scenario: "You notice that you are always the one initiating calls, dates, and serious conversations. How long would you continue before addressing it?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_49",
+  scenario: "Your partner reads your message but replies six hours later while posting on social media. What assumptions would you avoid making, and how would you communicate your feelings?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_50",
+  scenario: "Your partner tells you they love you but struggles to show affection in the way you understand it. What would help you feel loved?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_51",
+  scenario: "You and your partner attend different churches with different teachings on courtship. How do you decide which principles to follow together?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_52",
+  scenario: "Your partner feels called to full-time ministry, but you have always dreamed of building a corporate career. How do you explore both visions?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_53",
+  scenario: "You pray together regularly, but your partner avoids difficult conversations by saying, 'Let's just leave it to God.' How would you respond?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_54",
+  scenario: "Your partner's spiritual leader advises them against the relationship, but neither of you understands the reason. What steps would you take?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_55",
+  scenario: "One of you wants to raise the children in a strict Christian home, while the other prefers a more flexible approach. How do you find common ground?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_56",
+  scenario: "Your partner misses an important relationship commitment because of church activities for the third time. How do you discuss priorities without attacking their faith?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_57",
+  scenario: "You discover that your partner has doubts about a major Christian belief that is central to your own faith. Would you explore the difference together?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_58",
+  scenario: "Your partner wants you both to fast for seven days before making a major decision, but you believe practical research is also necessary. How do you combine both approaches?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_59",
+  scenario: "Your partner is an active church worker but treats service staff and family members rudely. What does this reveal to you, and what would you do?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_60",
+  scenario: "You and your partner disagree about whether a couple should have joint or separate finances after marriage. How would you approach the decision?",
+  category: "Money",
+},
+{
+  id: "mp-hyp_61",
+  scenario: "Your partner wants three children, but you are comfortable with only one or two. At what stage should you resolve this disagreement?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_62",
+  scenario: "After marriage, your partner expects their mother to have a spare key to your home and visit anytime. What boundaries would you establish?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_63",
+  scenario: "Your partner wants you to move in with their parents immediately after the wedding to save money, but you value privacy. What is your compromise?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_64",
+  scenario: "Your families disagree over the traditional marriage requirements and expenses. How do you prevent the disagreement from damaging your relationship?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_65",
+  scenario: "You discover before marriage that your partner expects you to handle all domestic responsibilities, regardless of your work schedule. How do you address the expectation?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_66",
+  scenario: "Your partner wants to name your first child after a family member, but you dislike the name and have another preference. How do you settle it?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_67",
+  scenario: "Your partner's sibling needs financial support every month, but the support is affecting your household savings. How do you agree on a fair arrangement?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_68",
+  scenario: "You and your partner disagree about disciplining your future children. What would you need to agree on before becoming parents?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_69",
+  scenario: "Your partner wants to share every major relationship detail with their best friend, while you prefer privacy. What boundaries would you suggest?",
+  category: "Vibes & Dating",
+},
+{
+  id: "mp-hyp_70",
+  scenario: "Five years into marriage, you realise that both of you have changed significantly. How would you reconnect and decide what your next chapter should look like?",
+  category: "Vibes & Dating",
+},
 ];
