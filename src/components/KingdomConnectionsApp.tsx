@@ -342,7 +342,7 @@ const currentHypothetical = getActiveQuestion(HYPOTHETICALS);
     notify("Gemini is preparing Spinner questions...");
 
     const questions = await generateSpinnerQuestions(
-      30,
+      25,
       MULTIPLAYER_QUESTIONS.map((q) => q.question)
     );
 
