@@ -55,6 +55,7 @@ import {
   showSpinnerResults,
   advanceSpinnerRound,
 } from "../services/roomService";
+import { generateBibleQuestions } from "../services/aiQuestionService";
 import { sounds } from "../utils/soundEffects";
 import "../kingdom-connections.css";
 
@@ -112,6 +113,8 @@ export default function KingdomConnectionsApp() {
   const [roomData, setRoomData] = useState<RoomData | null>(null);
   const [soloIndex, setSoloIndex] = useState(0);
   const [soloAnswers, setSoloAnswers] = useState<Record<string, number>>({});
+  const [soloQuestions, setSoloQuestions] = useState(BIBLE_QUESTIONS);
+const [soloLoading, setSoloLoading] = useState(false);
   const [soloFinished, setSoloFinished] = useState(false);
   const [hypotheticalInput, setHypotheticalInput] = useState("");
   const [icebreaker, setIcebreaker] = useState(0);
@@ -250,10 +253,11 @@ useEffect(() => {
     return () => clearInterval(interval);
   }, [roomData?.gameMode, roomData?.spinnerGame?.phase, roomData?.spinnerGame?.deadline]);
 
-  const currentQuestion = BIBLE_QUESTIONS[soloIndex];
-  const soloScore = useMemo(() => BIBLE_QUESTIONS.reduce((score, q) => (
-    score + (soloAnswers[q.id] === q.correctIndex ? 100 : 0)
-  ), 0), [soloAnswers]);
+ const currentQuestion = soloQuestions[soloIndex];
+
+const soloScore = useMemo(() => soloQuestions.reduce((score, q) => (
+  score + (soloAnswers[q.id] === q.correctIndex ? 100 : 0)
+), 0), [soloAnswers, soloQuestions]);
 
   const roomPlayers = Object.values(roomData?.players || {});
   const isHost = !!user && roomData?.hostId === user.uid;
@@ -423,20 +427,51 @@ const handleShowSpinnerResults = async () => {
     } catch (e) { notify(errorMessage(e), "error"); }
     finally { setBusy(false); }
   };
+const startSoloChallenge = async () => {
+  setSoloLoading(true);
+  setSoloIndex(0);
+  setSoloAnswers({});
+  setSoloFinished(false);
+  setSessionPoints(0);
+  setView("solo");
 
+  try {
+    const questions = await generateBibleQuestions(
+      10,
+      BIBLE_QUESTIONS.map(q => q.question)
+    );
+
+    setSoloQuestions(questions);
+    notify("Your fresh Bible Challenge is ready!");
+  } catch (error) {
+    console.error("Bible question generation failed:", error);
+
+    setSoloQuestions(BIBLE_QUESTIONS);
+    notify("Using the backup Bible questions for this round.");
+  } finally {
+    setSoloLoading(false);
+  }
+};
   const answerSolo = (optionIndex: number) => {
     if (!currentQuestion || soloAnswers[currentQuestion.id] !== undefined) return;
     setSoloAnswers((prev) => ({ ...prev, [currentQuestion.id]: optionIndex }));
   };
 
-  const nextSolo = () => {
-    if (soloIndex >= BIBLE_QUESTIONS.length - 1) setSoloFinished(true);
-    else setSoloIndex((index) => index + 1);
-  };
+ const nextSolo = () => {
+  if (soloIndex >= soloQuestions.length - 1) {
+    setSoloFinished(true);
+  } else {
+    setSoloIndex(index => index + 1);
+  }
+};
 
-  const resetSolo = () => {
-    setSoloIndex(0); setSoloAnswers({}); setSoloFinished(false);
-  };
+const resetSolo = () => {
+  setSoloIndex(0);
+  setSoloAnswers({});
+  setSoloFinished(false);
+  setSessionPoints(0);
+  startSoloChallenge();
+};
 
   const signOutUser = async () => {
     setActiveRoomId(null); setRoomData(null); setView("home");
@@ -469,7 +504,7 @@ const handleShowSpinnerResults = async () => {
                 <h1>Play with purpose.<br/><span>Connect beyond the game.</span></h1>
                 <p>Spark real banter, share hot takes, and find your people through fun lifestyle debates and scenarios.</p>
                 <div className="kc-hero-actions">
-                  <button className="kc-button kc-button-primary" onClick={() => { if (!user) startGuest(); setView("solo"); }} type="button"><Play size={16} fill="currentColor"/> Bible Challenge <ArrowRight size={16}/></button>
+                  <button className="kc-button kc-button-primary" onClick={() => { if (!user) startGuest(); startSoloChallenge(); }} type="button"><Play size={16} fill="currentColor"/> Bible Challenge <ArrowRight size={16}/></button>
                   <button className="kc-button kc-button-ghost" onClick={() => { if (!user) startGuest(); setView("room"); }} type="button"><Users size={16}/> Multiplayer Room</button>
                 </div>
               </div>
@@ -485,7 +520,7 @@ const handleShowSpinnerResults = async () => {
             <section className="kc-section">
               <div className="kc-section-heading"><div><div className="kc-eyebrow">CHOOSE YOUR EXPERIENCE</div><h2>Explore the games</h2></div><span className="kc-live-pill"><i/> READY</span></div>
               <div className="kc-mode-grid">
-                <button className="kc-mode-card" onClick={() => setView("solo")} type="button"><span className="kc-mode-icon"><BookOpen size={20}/></span><span className="kc-mode-label">SOLO</span><strong>Bible Challenge</strong><p>Test your scripture knowledge at your own pace.</p><span className="kc-card-link">Play solo <ArrowRight size={14}/></span></button>
+                <button className="kc-mode-card" onClick={() => startSoloChallenge()} type="button"><span className="kc-mode-icon"><BookOpen size={20}/></span><span className="kc-mode-label">SOLO</span><strong>Bible Challenge</strong><p>Test your scripture knowledge at your own pace.</p><span className="kc-card-link">Play solo <ArrowRight size={14}/></span></button>
                 <button className="kc-mode-card" onClick={() => setView("room")} type="button"><span className="kc-mode-icon"><Users size={20}/></span><span className="kc-mode-label">MULTIPLAYER</span><strong>Hot Takes & Hypotheticals</strong><p>Debate spicy Naija relationship and lifestyle views with friends.</p><span className="kc-card-link">Enter room <ArrowRight size={14}/></span></button>
                 <button className="kc-mode-card" onClick={() => { setIcebreaker((i) => (i + 1) % ICEBREAKER_PROMPTS.length); }} type="button"><span className="kc-mode-icon"><MessageCircle size={20}/></span><span className="kc-mode-label">ICEBREAKER</span><strong>Conversation Prompt</strong><p>{ICEBREAKER_PROMPTS[icebreaker]}</p><span className="kc-card-link">Next prompt <RefreshCw size={14}/></span></button>
               </div>
@@ -1033,4 +1068,8 @@ const handleShowSpinnerResults = async () => {
       <footer className="kc-footer"><div className="kc-footer-brand"><Crown size={15}/> KINGDOM CONNECTIONS</div><span>Faith · Friendship · Fellowship</span><span>Play with purpose.</span></footer>
     </div>
   );
+}
+
+function setSessionPoints(arg0: number) {
+  throw new Error("Function not implemented.");
 }
