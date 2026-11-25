@@ -257,15 +257,43 @@ Do not generate content similar to these previous items:
 ${JSON.stringify(avoid)}
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.8-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseJsonSchema: getQuestionSchema(gameType),
-        temperature: 0.9,
-      },
-    });
+
+async function generateWithRetry(prompt: string, config: any) {
+  const delays = [1500, 3000];
+
+  for (let attempt = 0; attempt <= delays.length; attempt++) {
+    try {
+      return await ai.models.generateContent({
+        model: "gemini-3.8-flash",
+        contents: prompt,
+        config,
+      });
+    } catch (error: any) {
+      const isTemporary =
+        error?.status === 503 ||
+        error?.status === 500 ||
+        error?.status === 429;
+
+      if (!isTemporary || attempt === delays.length) {
+        throw error;
+      }
+
+      await new Promise((resolve) =>
+        setTimeout(resolve, delays[attempt])
+      );
+    }
+  }
+
+  throw new Error("Gemini generation failed after retries.");
+}
+
+    
+const response = await generateWithRetry(prompt, {
+  responseMimeType: "application/json",
+  responseJsonSchema: getQuestionSchema(gameType),
+  temperature: 0.9,
+});
+
 
     if (!response.text) {
       throw new Error("Gemini returned an empty response.");
