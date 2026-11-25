@@ -258,34 +258,57 @@ ${JSON.stringify(avoid)}
 `;
 
 
+
 async function generateWithRetry(prompt: string, config: any) {
-  const delays = [1500, 3000];
+  const models = [
+    "gemini-3.8-flash",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash-lite",
+  ];
 
-  for (let attempt = 0; attempt <= delays.length; attempt++) {
-    try {
-      return await ai.models.generateContent({
-        model: "gemini-3.8-flash",
-        contents: prompt,
-        config,
-      });
-    } catch (error: any) {
-      const isTemporary =
-        error?.status === 503 ||
-        error?.status === 500 ||
-        error?.status === 429;
+  let lastError: any;
 
-      if (!isTemporary || attempt === delays.length) {
-        throw error;
+  for (const model of models) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        console.log(`Trying Gemini model: ${model}`);
+
+        return await ai.models.generateContent({
+          model,
+          contents: prompt,
+          config,
+        });
+      } catch (error: any) {
+        lastError = error;
+
+        const isTemporary =
+          error?.status === 503 ||
+          error?.status === 500 ||
+          error?.status === 429;
+
+        if (!isTemporary) {
+          throw error;
+        }
+
+        console.error(
+          `Model ${model} failed, attempt ${attempt + 1}:`,
+          error.message
+        );
+
+        if (attempt === 0) {
+          await new Promise(resolve =>
+            setTimeout(resolve, 1500)
+          );
+        }
       }
-
-      await new Promise((resolve) =>
-        setTimeout(resolve, delays[attempt])
-      );
     }
+
+    console.log(`Switching from ${model} to the next model.`);
   }
 
-  throw new Error("Gemini generation failed after retries.");
+  throw lastError || new Error("All Gemini models failed.");
 }
+
 
     
 const response = await generateWithRetry(prompt, {
