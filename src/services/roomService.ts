@@ -11,7 +11,7 @@ import {
   type Unsubscribe,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
-
+import type { SpinnerQuestion } from "./aiQuestionService";
 export type Player = {
   uid: string;
   name: string;
@@ -70,6 +70,7 @@ export type RoomData = {
   createdAt?: unknown;
   players: Record<string, Player>;
   spinnerGame?: SpinnerGameState;
+  spinnerQuestions?: SpinnerQuestion[];
   shuffledIndices?: number[];
   latestReaction?: {
     id: string;
@@ -280,7 +281,11 @@ const SPINNER_CATEGORIES: SpinnerCategory[] = [
 
 
 
-export async function startSpinnerMatch(roomId: string, uid: string) {
+export async function startSpinnerMatch(
+  roomId: string,
+  uid: string,
+  questions: SpinnerQuestion[],
+) {
   const ref = roomRef(roomId);
   const playersSnap = await getDocs(playersRef(roomId));
 
@@ -301,6 +306,7 @@ export async function startSpinnerMatch(roomId: string, uid: string) {
     tx.update(ref, {
       gameMode: "spinner",
       status: "playing",
+      spinnerQuestions: questions,
       currentQuestionIdx: 0,
       spinnerGame: {
         phase: "spinning",

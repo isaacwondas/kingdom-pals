@@ -55,7 +55,10 @@ import {
   showSpinnerResults,
   advanceSpinnerRound,
 } from "../services/roomService";
-import { generateBibleQuestions } from "../services/aiQuestionService";
+import {
+  generateBibleQuestions,
+  generateSpinnerQuestions,
+} from "../services/aiQuestionService";
 import { sounds } from "../utils/soundEffects";
 import "../kingdom-connections.css";
 
@@ -234,26 +237,33 @@ useEffect(() => {
 
 
 
-  useEffect(() => {
-    const game = roomData?.spinnerGame as any;
-    if (roomData?.gameMode !== "spinner" || game?.phase !== "answering" || !game?.startedAt) {
-      return;
-    }
+ useEffect(() => {
+  const game = roomData?.spinnerGame;
 
-    const duration = game.duration || 25;
+  if (
+    roomData?.gameMode !== "spinner" ||
+    game?.phase !== "answering" ||
+    !game?.deadline
+  ) {
+    return;
+  }
 
-    const updateTimer = () => {
-      const elapsed = Math.floor((Date.now() - game.startedAt) / 1000);
-      const remaining = Math.max(0, duration - elapsed);
-      setSpinnerSecondsLeft(remaining);
-    };
+  const updateTimer = () => {
+    setSpinnerSecondsLeft(
+      Math.max(0, Math.ceil((game.deadline! - Date.now()) / 1000))
+    );
+  };
 
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
+  updateTimer();
 
-    return () => clearInterval(interval);
-  }, [roomData?.gameMode, roomData?.spinnerGame?.phase, roomData?.spinnerGame?.deadline]);
+  const interval = setInterval(updateTimer, 1000);
 
+  return () => clearInterval(interval);
+}, [
+  roomData?.gameMode,
+  roomData?.spinnerGame?.phase,
+  roomData?.spinnerGame?.deadline,
+]);
  const currentQuestion = soloQuestions[soloIndex];
 
 const soloScore = useMemo(() => soloQuestions.reduce((score, q) => (
@@ -266,9 +276,10 @@ const soloScore = useMemo(() => soloQuestions.reduce((score, q) => (
 
   const mySpinnerAssignment = user && spinnerGame ? spinnerGame.assignments[user.uid] : undefined;
   const spinnerQuestion = mySpinnerAssignment
-    ? MULTIPLAYER_QUESTIONS.find((q) => q.id === mySpinnerAssignment.questionId)
-    : undefined;
-
+  ? roomData?.spinnerQuestions?.find(
+      (q) => q.id === mySpinnerAssignment.questionId
+    )
+  : undefined;
   const spinnerLeaderboard = [...roomPlayers].sort(
     (a, b) => (spinnerGame?.scores[b.uid] ?? 0) - (spinnerGame?.scores[a.uid] ?? 0)
   );
@@ -320,66 +331,74 @@ const currentHypothetical = getActiveQuestion(HYPOTHETICALS);
     finally { setBusy(false); }
   };
 
-  const handleStartSpinner = async () => {
-    if (!user || !activeRoomId) return notify("Create or join a room first.", "error");
-    try {
-      await startSpinnerMatch(activeRoomId, user.uid);
-      notify("Spinner game started!");
-    } catch (error) {
-      notify(errorMessage(error), "error");
-    }
-  };
+ const handleStartSpinner = async () => {
+  if (!user || !activeRoomId) {
+    return notify("Create or join a room first.", "error");
+  }
+
+  setBusy(true);
+
+  try {
+    notify("Gemini is preparing Spinner questions...");
+
+    const questions = await generateSpinnerQuestions(
+      30,
+      MULTIPLAYER_QUESTIONS.map((q) => q.question)
+    );
+
+    await startSpinnerMatch(activeRoomId, user.uid, questions);
+
+    notify("Spinner game started with fresh AI questions!");
+  } catch (error) {
+    console.error("Spinner start failed:", error);
+    notify(errorMessage(error), "error");
+  } finally {
+    setBusy(false);
+  }
+};
 
   const handleSpin = async () => {
     if (!user || !activeRoomId) return;
     try {
       await spinForCategory(
-        activeRoomId,
-        user.uid,
-        MULTIPLAYER_QUESTIONS.map(({ id, category }) => ({ id, category: category as SpinnerCategory }))
-      );
+  activeRoomId,
+  user.uid,
+  (roomData?.spinnerQuestions ?? []).map(({ id, category }) => ({
+    id,
+    category: category as SpinnerCategory,
+  }))
+);
       notify("Your question has been selected!");
     } catch (error) { notify(errorMessage(error), "error"); }
   };
 
  const handleBeginAnswers = async () => {
   if (!activeRoomId || !user) return;
-  
-  const roomRef = doc(db, "rooms", activeRoomId);
-  await updateDoc(roomRef, {
-    "spinnerGame.phase": "answering",
-    "spinnerGame.startedAt": Date.now(), // Real-time timestamp shared across devices
-    "spinnerGame.duration": 25 // Set to 25s to give a 5s grace buffer for network latency
-  });
+
+  try {
+    await beginSpinnerAnswers(activeRoomId, user.uid, 25000);
+  } catch (error) {
+    notify(errorMessage(error), "error");
+  }
 };
-  const handleSpinnerAnswer = async (selectedIndex: number) => {
+ const handleSpinnerAnswer = async (selectedIndex: number) => {
   if (!user || !activeRoomId || !spinnerQuestion) return;
 
   try {
+    await submitSpinnerAnswer(
+      activeRoomId,
+      user.uid,
+      selectedIndex,
+      spinnerQuestion.correctIndex
+    );
+
     const isCorrect = selectedIndex === spinnerQuestion.correctIndex;
-    const roomRef = doc(db, "rooms", activeRoomId);
 
-    // 1. Record individual answer
-    await updateDoc(roomRef, {
-      [`spinnerGame.answers.${user.uid}`]: {
-        selectedIndex,
-        isCorrect,
-        answeredAt: Date.now()
-      }
-    });
-
-    // 2. If correct, increment player score by 10 points!
-    if (isCorrect) {
-      const currentScore = spinnerGame?.scores?.[user.uid] || 0;
-      await updateDoc(roomRef, {
-        [`spinnerGame.scores.${user.uid}`]: currentScore + 10
-      });
-      notify("Correct! +10 points 🎯");
-    } else {
-      notify("Answer recorded!");
-    }
-  } catch (err: any) {
-    console.error("Error submitting answer:", err);
+    notify(
+      isCorrect ? "Correct! +10 points 🎯" : "Answer recorded!"
+    );
+  } catch (error) {
+    notify(errorMessage(error), "error");
   }
 };
 
@@ -387,15 +406,11 @@ const handleShowSpinnerResults = async () => {
   if (!activeRoomId || !user) return;
 
   try {
-    const roomRef = doc(db, "rooms", activeRoomId);
-    await updateDoc(roomRef, {
-      "spinnerGame.phase": "results"
-    });
-  } catch (err: any) {
-    console.error("Error transitioning to results:", err);
+    await showSpinnerResults(activeRoomId, user.uid);
+  } catch (error) {
+    notify(errorMessage(error), "error");
   }
 };
-
   const handleAdvanceSpinner = async () => {
     if (!user || !activeRoomId) return;
     try { await advanceSpinnerRound(activeRoomId, user.uid); } catch (error) { notify(errorMessage(error), "error"); }
