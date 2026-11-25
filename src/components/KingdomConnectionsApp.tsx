@@ -1047,7 +1047,7 @@ const resetSolo = () => {
             <div className="kc-question-card" style={{ textAlign: "center", padding: 40 }}>
               <h2>Leaderboard</h2>
               <p style={{ color: "var(--kc-muted)", margin: "12px 0 24px" }}>Play Bible Challenges to build up your points.</p>
-              <button className="kc-button kc-button-primary" onClick={() => { resetSolo(); setView("solo"); }} type="button">Start Bible Challenge</button>
+              <button className="kc-button kc-button-primary" onClick={() => { resetSolo(); startSoloChallenge(); }} type="button">Start Bible Challenge</button>
             </div>
           </section>
         )}
