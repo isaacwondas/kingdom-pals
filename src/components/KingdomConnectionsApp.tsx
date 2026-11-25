@@ -118,6 +118,7 @@ const [soloLoading, setSoloLoading] = useState(false);
   const [soloFinished, setSoloFinished] = useState(false);
   const [hypotheticalInput, setHypotheticalInput] = useState("");
   const [icebreaker, setIcebreaker] = useState(0);
+  const [sessionPoints, setSessionPoints] = useState(0);
   const [flyingEmojis, setFlyingEmojis] = useState<{ id: number; emoji: string }[]>([]);
   const [spinnerSecondsLeft, setSpinnerSecondsLeft] = useState(20);
 
@@ -1070,6 +1071,4 @@ const resetSolo = () => {
   );
 }
 
-function setSessionPoints(arg0: number) {
-  throw new Error("Function not implemented.");
-}
+
