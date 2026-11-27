@@ -756,8 +756,7 @@ const resetSolo = () => {
                 {roomData.gameMode === "hottakes" && (
   <div className="kc-wyr-panel">
     <div className="kc-eyebrow">
-      HOT TAKE #{ (roomData.currentQuestionIdx % HOT_TAKES.length) + 1 } · {currentHotTake.category}
-    </div>
+     HOT TAKE #{ (roomData.currentQuestionIdx % (roomData.hotTakeQuestions?.length || HOT_TAKES.length)) + 1 } · {currentHotTake.category}</div>
     
     <h2 style={{ fontSize: "1.25rem", margin: "12px 0 20px", lineHeight: "1.4" }}>
       {currentHotTake.statement}
@@ -852,7 +851,7 @@ const resetSolo = () => {
       {isHost && (
         <button 
           className="kc-button kc-button-primary" 
-          onClick={() => advanceRound(activeRoomId, user!.uid, roomData.currentQuestionIdx, HOT_TAKES.length)} 
+          onClick={() => advanceRound(activeRoomId, user!.uid, roomData.currentQuestionIdx, roomData.hotTakeQuestions?.length || HOT_TAKES.length)}
           type="button"
           style={{ width: "100%", padding: "12px" }}
         >
