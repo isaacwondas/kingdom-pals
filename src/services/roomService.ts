@@ -11,7 +11,10 @@ import {
   type Unsubscribe,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import type { SpinnerQuestion } from "./aiQuestionService";
+import type {
+  SpinnerQuestion,
+  HotTakeQuestion,
+} from "./aiQuestionService";
 export type Player = {
   uid: string;
   name: string;
@@ -71,6 +74,7 @@ export type RoomData = {
   players: Record<string, Player>;
   spinnerGame?: SpinnerGameState;
   spinnerQuestions?: SpinnerQuestion[];
+  hotTakeQuestions?: HotTakeQuestion[];
   shuffledIndices?: number[];
   latestReaction?: {
     id: string;
@@ -318,6 +322,35 @@ export async function startSpinnerMatch(
         usedQuestionIds: [],
         scores,
       } satisfies SpinnerGameState,
+    });
+  });
+}
+
+export async function startHotTakeMatch(
+  roomId: string,
+  uid: string,
+  questions: HotTakeQuestion[],
+) {
+  const ref = roomRef(roomId);
+
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+
+    if (!snap.exists()) {
+      throw new Error("Room no longer exists.");
+    }
+
+    const room = snap.data() as RoomData;
+
+    if (room.hostId !== uid) {
+      throw new Error("Only the host can start Hot Takes.");
+    }
+
+    tx.update(ref, {
+      gameMode: "hottakes",
+      status: "playing",
+      hotTakeQuestions: questions,
+      currentQuestionIdx: 0,
     });
   });
 }

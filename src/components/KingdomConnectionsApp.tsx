@@ -49,7 +49,9 @@ import {
   type RoomData,
   type SpinnerCategory,
   startSpinnerMatch,
-  spinForCategory,
+startHotTakeMatch,
+spinForCategory,
+ 
   beginSpinnerAnswers,
   submitSpinnerAnswer,
   showSpinnerResults,
@@ -58,6 +60,7 @@ import {
 import {
   generateBibleQuestions,
   generateSpinnerQuestions,
+  generateHotTakes,
 } from "../services/aiQuestionService";
 import { sounds } from "../utils/soundEffects";
 import "../kingdom-connections.css";
@@ -284,8 +287,12 @@ const soloScore = useMemo(() => soloQuestions.reduce((score, q) => (
     (a, b) => (spinnerGame?.scores[b.uid] ?? 0) - (spinnerGame?.scores[a.uid] ?? 0)
   );
 
- // ✅ Fixed code (Randomized)
-const currentHotTake = getActiveQuestion(HOT_TAKES);
+ 
+const currentHotTake = getActiveQuestion(
+  roomData?.hotTakeQuestions?.length
+    ? roomData.hotTakeQuestions
+    : HOT_TAKES
+);
 const currentHypothetical = getActiveQuestion(HYPOTHETICALS);
 
   const startGuest = async () => {
@@ -351,6 +358,32 @@ const currentHypothetical = getActiveQuestion(HYPOTHETICALS);
     notify("Spinner game started with fresh AI questions!");
   } catch (error) {
     console.error("Spinner start failed:", error);
+    notify(errorMessage(error), "error");
+  } finally {
+    setBusy(false);
+  }
+};
+
+const handleStartHotTakes = async () => {
+  if (!user || !activeRoomId) {
+    return notify("Create or join a room first.", "error");
+  }
+
+  setBusy(true);
+
+  try {
+    notify("Gemini is preparing Hot Takes...");
+
+    const questions = await generateHotTakes(
+      25,
+      HOT_TAKES.map((q) => q.statement)
+    );
+
+    await startHotTakeMatch(activeRoomId, user.uid, questions);
+
+    notify("Hot Takes started with fresh AI questions!");
+  } catch (error) {
+    console.error("Hot Takes start failed:", error);
     notify(errorMessage(error), "error");
   } finally {
     setBusy(false);
@@ -704,8 +737,14 @@ const resetSolo = () => {
     <button type="button" className={roomData.gameMode === "lobby" ? "active" : ""} onClick={() => setRoomMode(activeRoomId, user!.uid, "lobby")}>Lobby</button>
     
     {/* Use startRandomGame for Hot Takes */}
-    <button type="button" className={roomData.gameMode === "hottakes" ? "active" : ""} onClick={() => startRandomGame("hottakes", HOT_TAKES.length)}>Hot Takes</button>
-    
+    <button
+  type="button"
+  className={roomData.gameMode === "hottakes" ? "active" : ""}
+  onClick={handleStartHotTakes}
+  disabled={busy}
+>
+  {busy ? "Preparing..." : "Hot Takes"}
+</button>
     {/* Use startRandomGame for If E Reach Your Turn */}
     <button type="button" className={roomData.gameMode === "hypotheticals" ? "active" : ""} onClick={() => startRandomGame("hypotheticals", HYPOTHETICALS.length)}>If E Reach Your Turn</button>
     
